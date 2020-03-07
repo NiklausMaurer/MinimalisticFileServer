@@ -20,7 +20,7 @@ namespace MinimalisticFileServer.Controllers
         }
 
         [HttpGet]
-        public IEnumerable<File> Get()
+        public IEnumerable<FileDTO> Get()
         {
             Logger.Log(LogLevel.Trace, "Serving files");
             
@@ -28,7 +28,7 @@ namespace MinimalisticFileServer.Controllers
 
             foreach (var file in files)
             {
-                yield return new File {Url = $"/files/{Path.GetFileName(file)}"};
+                yield return new FileDTO {Url = $"/files/{Path.GetFileName(file)}"};
             }
         }
     }

@@ -1,28 +1,26 @@
-using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Text.Json;
 using MinimalisticFileServer;
 using MinimalisticFileServer.Controllers;
+using MinimalisticFileServerTest.Fixtures;
 using MinimalisticFileServerTest.TestDoubles;
-using Newtonsoft.Json.Schema;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace MinimalisticFileServerTest
 {
-    public class FilesControllerTest
+    public class FilesControllerTest : IClassFixture<DirectoryFixture>
     {
-        private readonly ITestOutputHelper _testOutputHelper;
         private FilesController FilesController { get; }
+        private DirectoryFixture DirectoryFixture { get; }
 
-        public FilesControllerTest(ITestOutputHelper testOutputHelper)
+
+        public FilesControllerTest(DirectoryFixture directoryFixture)
         {
-            _testOutputHelper = testOutputHelper;
+            DirectoryFixture = directoryFixture;
+            
             var configurationDummy = new ConfigurationDummy(new Dictionary<string, string>()
             {
-                {EnvironmentVariables.PATH, "Assets/TestFiles"}
+                {EnvironmentVariables.PATH, DirectoryFixture.TempDirectory}
             });
             
             FilesController = new FilesController(new LoggerDummy<FilesController>(), configurationDummy);
@@ -32,11 +30,14 @@ namespace MinimalisticFileServerTest
         public void TestGet()
         {
             // Act
-            var response = this.FilesController.Get();
+            var response = this.FilesController.Get().ToArray();
             
             // Assert
-            _testOutputHelper.WriteLine(JsonSerializer.Serialize(response));
             Assert.Equal(4, response.Count());
+            Assert.Contains(response, file => file.Url.Contains("File_1_äöüÄÖÜ.pdf"));
+            Assert.Contains(response, file => file.Url.Contains("File_2.pdf"));
+            Assert.Contains(response, file => file.Url.Contains("File_3.txt"));
+            Assert.Contains(response, file => file.Url.Contains("File_4.docx"));
         }
     }
 }

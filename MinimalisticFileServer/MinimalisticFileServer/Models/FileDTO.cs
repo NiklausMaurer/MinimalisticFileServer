@@ -1,6 +1,6 @@
 namespace MinimalisticFileServer
 {
-    public class File
+    public class FileDTO
     {
         public string Url { get; set; }
     }
