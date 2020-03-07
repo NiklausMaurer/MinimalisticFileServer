@@ -16,7 +16,7 @@ namespace MinimalisticFileServer
             return Host.CreateDefaultBuilder(args)
                 .ConfigureAppConfiguration((hostingContext, config) =>
                     {
-                        config.AddEnvironmentVariables(prefix: EnvironmentVariables.PREFIX);
+                        config.AddEnvironmentVariables(prefix: EnvironmentVariables.Prefix);
                     })
                 .ConfigureWebHostDefaults(webBuilder => { webBuilder.UseStartup<Startup>(); });
         }

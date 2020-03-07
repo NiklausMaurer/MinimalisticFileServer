@@ -24,7 +24,7 @@ namespace MinimalisticFileServer.Controllers
         {
             Logger.Log(LogLevel.Trace, "Serving files");
             
-            var files = Directory.GetFiles(Config[EnvironmentVariables.PATH]);
+            var files = Directory.GetFiles(Config[EnvironmentVariables.Path]);
 
             foreach (var file in files)
             {

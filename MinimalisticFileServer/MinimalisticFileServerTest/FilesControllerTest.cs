@@ -22,7 +22,7 @@ namespace MinimalisticFileServerTest
             
             var configurationDummy = new ConfigurationDummy(new Dictionary<string, string>()
             {
-                {EnvironmentVariables.PATH, DirectoryFixture.TempDirectory}
+                {EnvironmentVariables.Path, DirectoryFixture.TempDirectory}
             });
             
             FilesController = new FilesController(new LoggerDummy<FilesController>(), configurationDummy);
