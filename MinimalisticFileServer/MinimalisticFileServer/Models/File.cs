@@ -1,5 +1,3 @@
-using System;
-
 namespace MinimalisticFileServer
 {
     public class File
