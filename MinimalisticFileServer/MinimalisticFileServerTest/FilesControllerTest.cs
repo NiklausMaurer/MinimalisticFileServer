@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using MinimalisticFileServer;
 using MinimalisticFileServer.Controllers;
 using MinimalisticFileServerTest.Fixtures;
@@ -24,6 +26,8 @@ namespace MinimalisticFileServerTest
             });
             
             FilesController = new FilesController(new LoggerDummy<FilesController>(), configurationDummy);
+            FilesController.ControllerContext = new ControllerContext();
+            FilesController.ControllerContext.HttpContext = new DefaultHttpContext();
         }
 
         [Fact]

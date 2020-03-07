@@ -28,7 +28,7 @@ namespace MinimalisticFileServer.Controllers
 
             foreach (var file in files)
             {
-                yield return new FileDTO {Url = $"/files/{Path.GetFileName(file)}"};
+                yield return new FileDTO {Url = $"{this.Request.Scheme}://{this.Request.Host}{this.Request.PathBase}{this.Request.Path}/{Path.GetFileName(file)}"};
             }
         }
     }
