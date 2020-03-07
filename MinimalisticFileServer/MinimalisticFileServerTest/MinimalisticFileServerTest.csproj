@@ -17,4 +17,8 @@
       <ProjectReference Include="..\MinimalisticFileServer\MinimalisticFileServer.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Assets\TestFiles" />
+    </ItemGroup>
+
 </Project>
