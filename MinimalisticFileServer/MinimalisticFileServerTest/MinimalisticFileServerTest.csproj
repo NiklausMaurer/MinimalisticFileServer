@@ -21,4 +21,23 @@
       <Folder Include="Assets\TestFiles" />
     </ItemGroup>
 
+    <ItemGroup>
+      <None Remove="Assets\TestFiles\File_1_äöüÄÖÜ.pdf" />
+      <Content Include="Assets\TestFiles\File_1_äöüÄÖÜ.pdf">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Content>
+      <None Remove="Assets\TestFiles\File_2.pdf" />
+      <Content Include="Assets\TestFiles\File_2.pdf">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Content>
+      <None Remove="Assets\TestFiles\File_3.txt" />
+      <Content Include="Assets\TestFiles\File_3.txt">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Content>
+      <None Remove="Assets\TestFiles\File_4.docx" />
+      <Content Include="Assets\TestFiles\File_4.docx">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Content>
+    </ItemGroup>
+
 </Project>

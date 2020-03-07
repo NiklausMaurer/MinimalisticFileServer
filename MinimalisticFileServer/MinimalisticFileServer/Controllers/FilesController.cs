@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace MinimalisticFileServer.Controllers
@@ -8,24 +10,26 @@ namespace MinimalisticFileServer.Controllers
     [Route("[controller]")]
     public class FilesController : ControllerBase
     {
-        private readonly ILogger<FilesController> _logger;
+        private ILogger<FilesController> Logger { get; }
+        private IConfiguration Config { get; }
 
-        public FilesController(ILogger<FilesController> logger)
+        public FilesController(ILogger<FilesController> logger, IConfiguration config)
         {
-            _logger = logger;
+            Logger = logger;
+            Config = config;
         }
 
         [HttpGet]
         public IEnumerable<File> Get()
         {
-            _logger.Log(LogLevel.Trace, "Serving files");
+            Logger.Log(LogLevel.Trace, "Serving files");
+            
+            var files = Directory.GetFiles(Config[EnvironmentVariables.PATH]);
 
-            return new[]
+            foreach (var file in files)
             {
-                new File {Url = "http://somewhere:2222/files/file1.pdf"},
-                new File {Url = "http://somewhere:2222/files/file2.pdf"},
-                new File {Url = "http://somewhere:2222/files/file13pdf"}
-            };
+                yield return new File {Url = $"/files/{Path.GetFileName(file)}"};
+            }
         }
     }
 }
