@@ -1,0 +1,21 @@
+version: '3.1'
+ 
+services:
+    nginx-proxy:
+        image: nginx
+        ports:
+            - 80:80
+        restart: always
+        depends_on:
+            - api
+    api:
+        image: mfs
+        environment:
+            - VIRTUAL_HOST=myrazorapp.glenmccallum.com
+            - LETSENCRYPT_HOST=myrazorapp.glenmccallum.com
+            - LETSENCRYPT_EMAIL=glen.mccallum@protonmail.com
+        volumes:
+            - /home/nmaurer:/publishedfiles
+        expose:
+            - "5000"
+
