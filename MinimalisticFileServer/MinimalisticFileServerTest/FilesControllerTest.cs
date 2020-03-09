@@ -1,11 +1,13 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MinimalisticFileServer;
 using MinimalisticFileServer.Controllers;
+using MinimalisticFileServer.DataTransferObjects;
 using MinimalisticFileServerTest.Fixtures;
-using MinimalisticFileServerTest.TestDoubles;
 using Xunit;
 
 namespace MinimalisticFileServerTest
@@ -19,29 +21,41 @@ namespace MinimalisticFileServerTest
         public FilesControllerTest(DirectoryFixture directoryFixture)
         {
             DirectoryFixture = directoryFixture;
-            
+
             var configurationDummy = new ConfigurationDummy(new Dictionary<string, string>()
             {
                 {EnvironmentVariables.Path, DirectoryFixture.TempDirectory}
             });
-            
-            FilesController = new FilesController(new LoggerDummy<FilesController>(), configurationDummy);
-            FilesController.ControllerContext = new ControllerContext();
-            FilesController.ControllerContext.HttpContext = new DefaultHttpContext();
+
+            FilesController = new FilesController(configurationDummy)
+            {
+                ControllerContext = new ControllerContext {HttpContext = new DefaultHttpContext()}
+            };
         }
 
         [Fact]
-        public void TestGet()
+        public async Task TestGet_all_files()
         {
             // Act
-            var response = this.FilesController.Get().ToArray();
+            var response = await FilesController.Get(String.Empty);
             
             // Assert
-            Assert.Equal(4, response.Count());
-            Assert.Contains(response, file => file.Url.Contains("File_1_äöüÄÖÜ.pdf"));
-            Assert.Contains(response, file => file.Url.Contains("File_2.pdf"));
-            Assert.Contains(response, file => file.Url.Contains("File_3.txt"));
-            Assert.Contains(response, file => file.Url.Contains("File_4.docx"));
+            Assert.IsType<OkObjectResult>(response);
+            var fileDtos = ((IEnumerable<FileDto>)((OkObjectResult) response).Value).ToArray();
+            Assert.Equal(4, fileDtos.Count());
+            Assert.Contains(fileDtos, f => f.Url.Contains("File_1_äöüÄÖÜ.pdf"));
+            Assert.Contains(fileDtos, f => f.Url.Contains("File_2.pdf"));
+            Assert.Contains(fileDtos, f => f.Url.Contains("File_3.txt"));
+            Assert.Contains(fileDtos, f => f.Url.Contains("File_4.docx"));
         }
+
+        [Fact]
+        public async Task TestGet_single_file()
+        {
+            // Act
+            var response = await FilesController.Get("File_2.pdf");
+            
+            // Assert
+            Assert.IsType<FileStreamResult>(response); }
     }
 }

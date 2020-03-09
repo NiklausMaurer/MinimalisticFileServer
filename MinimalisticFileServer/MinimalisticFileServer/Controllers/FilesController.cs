@@ -1,8 +1,9 @@
-﻿using System.Collections.Generic;
-using System.IO;
+﻿using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
+using MinimalisticFileServer.DataTransferObjects;
 
 namespace MinimalisticFileServer.Controllers
 {
@@ -10,26 +11,39 @@ namespace MinimalisticFileServer.Controllers
     [Route("[controller]")]
     public class FilesController : ControllerBase
     {
-        private ILogger<FilesController> Logger { get; }
         private IConfiguration Config { get; }
+        private string Directory { get; }
 
-        public FilesController(ILogger<FilesController> logger, IConfiguration config)
+        public FilesController(IConfiguration config)
         {
-            Logger = logger;
             Config = config;
+            Directory = Config[EnvironmentVariables.Path];
         }
 
-        [HttpGet]
-        public IEnumerable<FileDTO> Get()
+        [HttpGet("/files/{filename?}")]
+        public async Task<IActionResult> Get(string filename)
         {
-            Logger.Log(LogLevel.Trace, "Serving files");
+            if (!string.IsNullOrEmpty(filename)) return ServeFile(filename);
             
-            var files = Directory.GetFiles(Config[EnvironmentVariables.Path]);
+            var files = await Task.Run(() => System.IO.Directory.GetFiles(Directory));
+            
+            return Ok(files.Select(f => new FileDto(GenerateDownloadUrl(f))));
+        }
 
-            foreach (var file in files)
-            {
-                yield return new FileDTO {Url = $"{this.Request.Scheme}://{this.Request.Host}{this.Request.PathBase}{this.Request.Path}/{Path.GetFileName(file)}"};
-            }
+        private string GenerateDownloadUrl(string file)
+        {
+            return $"{this.Request.Scheme}://{this.Request.Host}{this.Request.PathBase}/files/{Path.GetFileName(file)}";
+        }
+
+        private IActionResult ServeFile(string filename)
+        {
+            var file = Path.Combine(Directory, filename);
+
+            if (!System.IO.File.Exists(file)) return NotFound();
+
+            var stream = new FileStream(file, FileMode.Open);
+            
+            return File(stream, "application/octet-stream");
         }
     }
 }

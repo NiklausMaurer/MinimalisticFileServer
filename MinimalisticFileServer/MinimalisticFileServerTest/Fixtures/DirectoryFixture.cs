@@ -11,6 +11,8 @@ namespace MinimalisticFileServerTest.Fixtures
         {
             TempDirectory = Path.Join(Path.GetTempPath(), "MinimalisticFileServer");
             
+            if(Directory.Exists(TempDirectory)) Directory.Delete(TempDirectory, true);
+
             Directory.CreateDirectory(TempDirectory);
 
             foreach(var file in Directory.GetFiles("Assets/TestFiles"))
