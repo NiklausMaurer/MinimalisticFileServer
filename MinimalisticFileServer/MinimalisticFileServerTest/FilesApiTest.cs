@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -10,19 +11,27 @@ using Xunit;
 
 namespace MinimalisticFileServerTest
 {
-    public class FilesApiTest : IClassFixture<ApiIntegrationTestFixture>
+    public class FilesApiTest : IDisposable, IClassFixture<ApiIntegrationTestFixture>
     {
+        private ApiIntegrationTestFixture ApiIntegrationTestFixture { get; }
         private HttpClient Client { get; }
         
         public FilesApiTest(ApiIntegrationTestFixture apiIntegrationTestFixture)
         {
+            ApiIntegrationTestFixture = apiIntegrationTestFixture;
             Client = apiIntegrationTestFixture.Server.CreateClient();
         }
-    
+
+        public void Dispose()
+        {
+            ApiIntegrationTestFixture.RemoveTestFiles();
+        }
+
         [Fact]
         public async Task TestGetAllFiles()
         {
             // Arrange
+            ApiIntegrationTestFixture.ArrangeTestFiles();
             var request = new HttpRequestMessage(HttpMethod.Get, "/files");
             
             // Act
@@ -39,11 +48,12 @@ namespace MinimalisticFileServerTest
             Assert.Contains(files, file => file.Url.Equals("http://localhost/files/File_3.txt"));
             Assert.Contains(files, file => file.Url.Equals("http://localhost/files/File_4.docx"));
         }
-        
+
         [Fact]
         public async Task TestGetExistingSingleFile()
         {
             // Arrange
+            ApiIntegrationTestFixture.ArrangeTestFiles();
             var request = new HttpRequestMessage(HttpMethod.Get, "/files/File_3.txt");
             
             // Act
@@ -62,6 +72,34 @@ namespace MinimalisticFileServerTest
         {
             // Arrange
             var request = new HttpRequestMessage(HttpMethod.Get, "/files/nothing.txt");
+            
+            // Act
+            var response = await Client.SendAsync(request);
+            
+            // Assert
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task TestDeleteExistingFile()
+        {
+            // Arrange
+            ApiIntegrationTestFixture.ArrangeTestFiles();
+            var request = new HttpRequestMessage(HttpMethod.Delete, "/files/File_2.pdf");
+            
+            // Act
+            var response = await Client.SendAsync(request);
+            
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.False(ApiIntegrationTestFixture.Exists("File2.pdf"));
+        }
+        
+        [Fact]
+        public async Task TestDeleteNotExistingFile()
+        {
+            // Arrange
+            var request = new HttpRequestMessage(HttpMethod.Delete, "/files/nothing.pdf");
             
             // Act
             var response = await Client.SendAsync(request);

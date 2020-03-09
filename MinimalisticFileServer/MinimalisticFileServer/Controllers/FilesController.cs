@@ -30,6 +30,17 @@ namespace MinimalisticFileServer.Controllers
             return Ok(files.Select(f => new FileDto(GenerateDownloadUrl(f))));
         }
 
+        [HttpDelete("/files/{filename}")]
+        public async Task<IActionResult> Delete(string filename)
+        {
+            var file = GetFilePath(filename);
+            if (!System.IO.File.Exists(file)) return NotFound();
+            
+            await Task.Run(() => System.IO.File.Delete(file));
+
+            return Ok();
+        }
+
         private string GenerateDownloadUrl(string file)
         {
             return $"{this.Request.Scheme}://{this.Request.Host}{this.Request.PathBase}/files/{Path.GetFileName(file)}";
@@ -37,13 +48,18 @@ namespace MinimalisticFileServer.Controllers
 
         private IActionResult ServeFile(string filename)
         {
-            var file = Path.Combine(Directory, filename);
+            var file = GetFilePath(filename);
 
             if (!System.IO.File.Exists(file)) return NotFound();
 
             var stream = new FileStream(file, FileMode.Open);
             
             return File(stream, "application/octet-stream");
+        }
+
+        private string GetFilePath(string filename)
+        {
+            return Path.Combine(Directory, filename);
         }
     }
 }
