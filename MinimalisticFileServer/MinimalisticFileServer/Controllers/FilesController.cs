@@ -11,22 +11,22 @@ namespace MinimalisticFileServer.Controllers
     [Route("[controller]")]
     public class FilesController : ControllerBase
     {
-        private IConfiguration Config { get; }
-        private string Directory { get; }
-
         public FilesController(IConfiguration config)
         {
             Config = config;
             Directory = Config[EnvironmentVariables.Path];
         }
 
+        private IConfiguration Config { get; }
+        private string Directory { get; }
+
         [HttpGet("/files/{filename?}")]
         public async Task<IActionResult> Get(string filename)
         {
             if (!string.IsNullOrEmpty(filename)) return ServeFile(filename);
-            
+
             var files = await Task.Run(() => System.IO.Directory.GetFiles(Directory));
-            
+
             return Ok(files.Select(f => new FileDto(GenerateDownloadUrl(f))));
         }
 
@@ -35,7 +35,7 @@ namespace MinimalisticFileServer.Controllers
         {
             var file = GetFilePath(filename);
             if (!System.IO.File.Exists(file)) return NotFound();
-            
+
             await Task.Run(() => System.IO.File.Delete(file));
 
             return Ok();
@@ -43,7 +43,7 @@ namespace MinimalisticFileServer.Controllers
 
         private string GenerateDownloadUrl(string file)
         {
-            return $"{this.Request.Scheme}://{this.Request.Host}{this.Request.PathBase}/files/{Path.GetFileName(file)}";
+            return $"{Request.Scheme}://{Request.Host}{Request.PathBase}/files/{Path.GetFileName(file)}";
         }
 
         private IActionResult ServeFile(string filename)
@@ -53,7 +53,7 @@ namespace MinimalisticFileServer.Controllers
             if (!System.IO.File.Exists(file)) return NotFound();
 
             var stream = new FileStream(file, FileMode.Open);
-            
+
             return File(stream, "application/octet-stream");
         }
 
