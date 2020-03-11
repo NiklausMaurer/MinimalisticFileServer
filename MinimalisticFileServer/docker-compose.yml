@@ -2,18 +2,15 @@ version: '3.1'
  
 services:
     nginx-proxy:
-        image: nginx
+        image: nmreg.azurecr.io/nginx
         ports:
             - 80:80
         restart: always
         depends_on:
             - api
     api:
-        image: mfs
-        environment:
-            - VIRTUAL_HOST=myrazorapp.glenmccallum.com
-            - LETSENCRYPT_HOST=myrazorapp.glenmccallum.com
-            - LETSENCRYPT_EMAIL=glen.mccallum@protonmail.com
+        image: nmreg.azurecr.io/minimalisticfileserver
+        restart: always
         volumes:
             - /home/nmaurer:/publishedfiles
         expose:
